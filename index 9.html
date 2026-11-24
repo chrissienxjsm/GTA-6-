@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Leonida">
+<meta name="theme-color" content="#000000"><title>Leonida (Unofficial Fan Project)</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;color:#fff;font-family:"Avenir Next",Futura,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+#pl,#pl iframe{position:fixed;top:0;left:0;width:100%;height:100%;border:0;pointer-events:none}
+#cover{position:fixed;top:0;left:0;right:0;bottom:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;z-index:5;transition:opacity .6s}
+#cover.hide{opacity:0;pointer-events:none}
+#go{width:84px;height:84px;border-radius:50%;border:2px solid #ff3c8e;background:rgba(255,60,142,.15);color:#fff;font-size:34px;padding:0 0 0 6px}
+#go:active{background:#ff3c8e}
+#msg{font-size:15px;opacity:.8;max-width:420px}
+#note{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;font-size:11px;opacity:.4;z-index:6;pointer-events:none}
+</style></head><body>
+<div id="pl"></div>
+<div id="cover"><button id="go" aria-label="Play">&#9654;</button><div id="msg">Tap to play with sound</div></div>
+<div id="note">Unofficial fan project. Not affiliated with Rockstar Games.</div>
+<script>
+var IDS=['rz1B4B2yBZY','l4ukT5Ie-Go','R97EoVD1nr4'],i=0,P=null,ready=false,failed=false,timer=null,cover=document.getElementById('cover'),msg=document.getElementById('msg'),go=document.getElementById('go');
+var s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.onerror=function(){failed=true};document.head.appendChild(s);
+window.onYouTubeIframeAPIReady=function(){ready=true};
+function show(t,btn){msg.textContent=t;go.style.display=btn?'block':'none';cover.classList.remove('hide')}
+function begin(){
+  if(!ready){if(failed){show('Could not load YouTube. Check your connection, then tap to retry.',1)}else{show('Loading... tap again in a moment.',1)}return}
+  if(P){play(i);return}
+  P=new YT.Player('pl',{videoId:IDS[i],playerVars:{autoplay:1,controls:0,disablekb:1,fs:0,playsinline:1,rel:0,modestbranding:1,iv_load_policy:3,enablejsapi:1},
+    events:{onReady:function(e){e.target.unMute();e.target.setVolume(100);e.target.playVideo();watch()},onStateChange:st,onError:err}});
+}
+function watch(){clearTimeout(timer);timer=setTimeout(function(){if(P&&P.getPlayerState&&[1,3].indexOf(P.getPlayerState())<0)show('Tap to continue with sound',1)},2500)}
+function play(n){i=n;cover.classList.add('hide');P.loadVideoById(IDS[n]);P.unMute();P.setVolume(100);P.playVideo();watch()}
+function st(e){
+  if(e.data===1){clearTimeout(timer);cover.classList.add('hide')}
+  if(e.data===2&&!document.hidden){setTimeout(function(){if(P.getPlayerState()===2)P.playVideo()},150)}
+  if(e.data===0){cover.classList.remove('hide');msg.textContent='';go.style.display='none';
+    if(i<IDS.length-1){setTimeout(function(){play(i+1)},700)}else{setTimeout(function(){i=0;show('Tap to watch again',1)},700)}}
+}
+function err(e){show('This video is unavailable ('+e.data+'). Tap to try the next one.',1);i=Math.min(i+1,IDS.length-1)}
+go.onclick=function(){go.style.display='none';msg.textContent='';begin()};
+document.addEventListener('touchmove',function(e){e.preventDefault()},{passive:false});
+</script></body></html>
